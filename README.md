@@ -12,19 +12,20 @@ Data Preparation (DP), which involves tasks such as data cleaning, imputation an
 
 KNOWTRANS consists of two components: SKC for training stage and AKB for inference stage.
 
-First, you need first to install the LLM training framework [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory).
+1. Install the LLM training framework [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory).
 
-Then, you need to install our modified peft module in `SKC/peft` with:
+2. Install our modified peft module in `SKC/peft` with:
 
-```
-pip install -e SKC/peft
-```
+    ```python
+    pip install -e peft
+    ```
 
-Last, in order to run AKB component, you need setup your OPENAI_API_KEY with the following command:
+3. Setup your OPENAI_API_KEY with the following command:
 
-```
-export OPENAI_API_KEY=YOUR_KEY
-```
+    ```bash
+    export OPENAI_API_KEY=YOUR_KEY
+    ```
+
 <!-- 
 ## Dataset Preparation
 1. Transfer instance to string.
@@ -59,7 +60,7 @@ export OPENAI_API_KEY=YOUR_KEY
    
  - Generation:
     ```python
-    python experiments/run_DP.py \
+    python src/run_DP.py \
         --task={dataset_name} \
         --mode='train' \
         --train_dataset='{train_dataset}' \
@@ -76,7 +77,7 @@ export OPENAI_API_KEY=YOUR_KEY
 
 - Refinemnt:
     ```python
-    python experiments/run_DP.py \
+    python src/run_DP.py \
         --task={dataset_name} \
         --mode='error' \
         --train_dataset='{train_dataset}' \
@@ -89,6 +90,19 @@ export OPENAI_API_KEY=YOUR_KEY
         --lora {lora_path} \
         --save_path {save_path}
     ```
+
+4. Inference on test dataset
+   ```python
+   python src/run_infer.py \
+    --file_path "abt_buy,ae,beers_DC,beers,cms,flights,flipkart,oa,phone,rayyan_DC,rayyan,walmart_amazon,sotab3" \
+    --save_path {save_path} \
+    --base_data_dir "data/test" \
+    --model_weights {backbone_model_path}\
+    --lora_weights {lora_path} \
+    --model_type "mistral" \
+    --enable_vllm \
+    --overwrite
+   ```
 
 ## Comments
 
