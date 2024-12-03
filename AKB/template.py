@@ -1,5 +1,5 @@
 import sys
-sys.path.append('automatic_prompt_engineer')
+sys.path.append('AKB')
 import icl
 import os
 import json
@@ -596,8 +596,8 @@ def register_templates_from_folder(folder_path):
             except (json.JSONDecodeError, IOError) as e:
                 print(f"Error loading JSON file '{file_name}': {e}")
 
-register_templates_from_folder('./templates')
-                
+register_templates_from_folder('./AKB/templates')
+
 _sotab_comma = {
     "Restaurant": "time, day of week, country, locality of address, telephone, name of restaurant, postal code, region of address, coordinate, description of restaurant, payment accepted, price range, review",
     "Event": "date and time, name of event, description of event, event status, event attendance mode, currency, organization, telephone, date",
