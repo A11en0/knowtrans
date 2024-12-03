@@ -12,7 +12,7 @@ Data Preparation (DP), which involves tasks such as data cleaning, imputation an
 
 1. Install the LLM training framework [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory).
 
-2. Install our modified peft module in `SKC/peft` with:
+2. Install our modified peft module with:
 
     ```python
     pip install -e peft
