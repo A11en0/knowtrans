@@ -91,7 +91,7 @@ KNOWTRANS consists of two components: SKC for training stage and AKB for inferen
         --save_path {save_path}
     ```
 
-4. Inference on test dataset
+5. Inference on test dataset
    ```python
    python src/run_infer.py \
     --file_path "abt_buy,ae,beers_DC,beers,cms,flights,flipkart,oa,phone,rayyan_DC,rayyan,walmart_amazon,sotab3" \
