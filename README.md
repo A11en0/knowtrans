@@ -24,22 +24,6 @@ Data Preparation (DP), which involves tasks such as data cleaning, imputation an
     export OPENAI_API_KEY=YOUR_KEY
     ```
 
-<!-- 
-## Dataset Preparation
-1. Transfer instance to string.
-
-
-2. Export instruction datasets.
-    ```python
-    python experiments/run_DP.py \
-        --task={task} \
-        --mode='export' \
-        --test_dataset={dataset} \
-        --test_version='' \
-        --save_suffix='test'
-    ```
--->
-
 ## Running
 
 KNOWTRANS consists of two components: SKC for the training stage and AKB for the inference stage.
