@@ -26,7 +26,7 @@ Data Preparation (DP), which involves tasks such as data cleaning, imputation an
 
 ## Running
 
-KNOWTRANS consists of two components: SKC for the training stage and AKB for the inference stage.
+KNOWTRANS consists of two components: Selective Knowledge Concentration (SKC) for the training stage and Automatic Knowledge Bridging (AKB) for the inference stage.
 
 ### SKC (Training Stage)
 
