@@ -1,0 +1,47 @@
+generation:
+  num_subsamples: 10
+  num_demos: 10
+  num_prompts_per_subsample: 1
+  model:
+    name: GPT_forward
+    batch_size: 1
+    gpt_config:
+      model: gpt-4o
+      temperature: 0.9
+      max_tokens: 512
+      top_p: 0.9
+      frequency_penalty: 0.0
+      presence_penalty: 0.0
+refine:
+  num_subsamples: 5
+  num_demos: 4
+  num_prompts_per_subsample: 1
+  model:
+    name: GPT_forward
+    batch_size: 1
+    gpt_config:
+      model: gpt-4o
+      temperature: 0.9
+      max_tokens: 3072
+      top_p: 0.9
+      frequency_penalty: 0.0
+      presence_penalty: 0.0
+evaluation:
+  method: f1_score
+  num_samples: 100
+  num_few_shot: 0
+  model:
+    name: GPT_forward
+    batch_size: 4
+    gpt_config:
+      model: pre-train/Mistral-7B-Instruct-v0.2
+      temperature: 0.35
+      max_tokens: 128
+      top_p: 0.9
+      top_k: 10
+      frequency_penalty: 0.0
+      presence_penalty: 0.0
+      use_beam_search: False
+      best_of: 1
+      seed: 42
+
