@@ -27,8 +27,7 @@ Data Preparation (DP), which involves tasks such as data cleaning, imputation an
 <!-- 
 ## Dataset Preparation
 1. Transfer instance to string.
-   
-   `python AKB/data_utils/prepare.py`
+
 
 2. Export instruction datasets.
     ```python
@@ -39,8 +38,7 @@ Data Preparation (DP), which involves tasks such as data cleaning, imputation an
         --test_version='' \
         --save_suffix='test'
     ```
-
-3. (optional) If In-context Learning is necessary, add "--export_as_demo true" parameter to generate damo datasets based on train.json and use "ICL_method".  -->
+-->
 
 ## Running
 
@@ -48,7 +46,7 @@ KNOWTRANS consists of two components: SKC for the training stage and AKB for the
 
 ### SKC (Training Stage)
 
-1. Download datasets from [Jellyfish Benchmark](https://huggingface.co/datasets/NECOUDBFM/Jellyfish-Instruct).
+1. Download datasets from [Jellyfish Benchmark](https://huggingface.co/datasets/NECOUDBFM/Jellyfish-Instruct). If prepare your own datasets, we also provide a dataset preprocessing script `python AKB/data_utils/prepare.py`. 
    
 2. Run upstream training scripts in `scripts/upstream-train-7B/train.sh` with LLaMA-Factory.
 
@@ -91,7 +89,19 @@ KNOWTRANS consists of two components: SKC for the training stage and AKB for the
         --save_path={save_path}
     ```
 
-5. Inference on test dataset
+5. Export instruction datasets with knowledge.
+    ```python
+    python experiments/run_DP.py \
+        --task={task} \
+        --mode='export' \
+        --test_dataset={dataset} \
+        --test_version='' \
+        --save_suffix='test'
+    ```
+
+    (optional) If In-context Learning is necessary, add "--export_as_demo true" parameter to generate damo datasets based   on train.json and use "ICL_method". 
+
+6. Inference on the test dataset
    ```python
    python src/run_infer.py \
     --file_path="abt_buy,ae,beers_DC,beers,cms,flights,flipkart,oa,phone,rayyan_DC,rayyan,walmart_amazon,sotab3" \
