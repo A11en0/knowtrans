@@ -88,7 +88,7 @@ class GPT_Forward(LLM):
         if 'gpt' in self.model_id:
             self.client = OpenAI(
                 # base_url = 'http://a40c09:8000/v1',
-                # api_key='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', # required, but unused
+                # api_key=''
             )
             # temp added for token analysis
             self.tokenizer = AutoTokenizer.from_pretrained('/share/home/12351018/pre-train/Jellyfish-7B')
@@ -580,7 +580,7 @@ class GPT_Insert(LLM):
         response = None
         while response is None:
             try:
-                openai.api_key = "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"
+                openai.api_key = ''
                 response = openai.Completion.create(
                     **config, prompt=prefix, suffix=suffix)
                 # from openai import OpenAI
