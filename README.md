@@ -2,15 +2,13 @@
 
 Yuhang Ge, Fengyu Li, Yuren Mao, Yanbo Yang, Congcong Ge, Zhaoqiang Chen, Jiang Long, Yunjun Gao*
 
-This repo contains code for "KNOWTRANS: Boosting Transferability of Data Preparation LLMs via Knowledge Augmentation". Please see our paper `KnowTrans-Full-Version.pdf` for technique details.
+This repo contains code for "KNOWTRANS: Boosting Transferability of Data Preparation LLMs via Knowledge Augmentation." Please see our paper `KnowTrans-Full-Version.pdf` for technique details.
 
 # Abstract
 
-Data Preparation (DP), which involves tasks such as data cleaning, imputation and integration, is a fundamental process in data-driven applications. Recently, Large Language Models (LLMs) fine-tuned for DP tasks, i.e., DP-LLMs, have achieved state-of-the-art performance. However, transferring DP-LLMs to novel datasets and tasks typically requires a substantial amount of labeled data, which is impractical in many real-world scenarios. To address this issue, we propose a knowledge augmentation framework for data preparation, dubbed KNOWTRANS. This framework allows DP-LLMs to be transferred to novel datasets and tasks with a few data, significantly decreasing the dependence on extensive labeled data. KNOWTRANS comprises two components: Selective Knowledge Concentration and Automatic Knowledge Bridging. The first component re-uses knowledge from previously learned tasks, while the second automatically integrates additional knowledge from external sources. Extensive experiments on 13 datasets demonstrate the effectiveness of KNOWTRANS. KNOWTRANS boosts the performance of the stateof-the-art DP-LLM, Jellyfish-7B, by an average of 4.93%, enabling it to outperform both GPT-4 and GPT-4o.
+Data Preparation (DP), which involves tasks such as data cleaning, imputation and integration, is a fundamental process in data-driven applications. Recently, Large Language Models (LLMs) fine-tuned for DP tasks, i.e., DP-LLMs, have achieved state-of-the-art performance. However, transferring DP-LLMs to novel datasets and tasks typically requires a substantial amount of labeled data, which is impractical in many real-world scenarios. To address this issue, we propose a knowledge augmentation framework for data preparation, dubbed KNOWTRANS. This framework allows DP-LLMs to be transferred to novel datasets and tasks with a few data, significantly decreasing the dependence on extensive labeled data. KNOWTRANS comprises two components: Selective Knowledge Concentration and Automatic Knowledge Bridging. The first component re-uses knowledge from previously learned tasks, while the second automatically integrates additional knowledge from external sources. Extensive experiments on 13 datasets demonstrate the effectiveness of KNOWTRANS. KNOWTRANS boosts the performance of the state-of-the-art DP-LLM, Jellyfish-7B, by an average of 4.93%, enabling it to outperform both GPT-4 and GPT-4o.
 
 ## Installation
-
-KNOWTRANS consists of two components: SKC for training stage and AKB for inference stage.
 
 1. Install the LLM training framework [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory).
 
@@ -46,6 +44,8 @@ KNOWTRANS consists of two components: SKC for training stage and AKB for inferen
 
 ## Running
 
+KNOWTRANS consists of two components: SKC for the training stage and AKB for the inference stage.
+
 ### SKC (Training Stage)
 
 1. Download datasets from [Jellyfish Benchmark](https://huggingface.co/datasets/NECOUDBFM/Jellyfish-Instruct).
@@ -63,43 +63,43 @@ KNOWTRANS consists of two components: SKC for training stage and AKB for inferen
     python src/run_DP.py \
         --task={dataset_name} \
         --mode='train' \
-        --train_dataset='{train_dataset}' \
+        --train_dataset={train_dataset} \
         --train_version='' \
-        --test_dataset='{test_dataset}' \
+        --test_dataset={test_dataset} \
         --test_version='' \
         --infer_mode='direct' \
         --component='rules' \
         --save_suffix='-train' \
-        --model {upstream_model_path} \
-        --lora {lora_path} \
-        --save_path {save_path}
+        --model={upstream_model_path} \
+        --lora={lora_path} \
+        --save_path={save_path}
     ```
 
-- Refinment:
+- Refinement:
     ```python
     python src/run_DP.py \
         --task={dataset_name} \
         --mode='error' \
-        --train_dataset='{train_dataset}' \
+        --train_dataset={train_dataset} \
         --train_version='' \
-        --test_dataset='{test_dataset}' \
+        --test_dataset={test_dataset} \
         --test_version='1' \
         --infer_mode='direct' \
         --save_suffix='-train_1' \
-        --model {upstream_model_path} \
-        --lora {lora_path} \
-        --save_path {save_path}
+        --model={upstream_model_path} \
+        --lora={lora_path} \
+        --save_path={save_path}
     ```
 
 5. Inference on test dataset
    ```python
    python src/run_infer.py \
-    --file_path "abt_buy,ae,beers_DC,beers,cms,flights,flipkart,oa,phone,rayyan_DC,rayyan,walmart_amazon,sotab3" \
-    --save_path {save_path} \
-    --base_data_dir "data/test" \
-    --model_weights {backbone_model_path}\
-    --lora_weights {lora_path} \
-    --model_type "mistral" \
+    --file_path="abt_buy,ae,beers_DC,beers,cms,flights,flipkart,oa,phone,rayyan_DC,rayyan,walmart_amazon,sotab3" \
+    --save_path={save_path} \
+    --base_data_dir="data/test" \
+    --model_weights={backbone_model_path}\
+    --lora_weights={lora_path} \
+    --model_type="mistral" \
     --enable_vllm \
     --overwrite
    ```
