@@ -2,7 +2,7 @@
 
 Yuhang Ge, Fengyu Li, Yuren Mao, Yanbo Yang, Congcong Ge, Zhaoqiang Chen, Jiang Long, Yunjun Gao*
 
-This repo contains code for "KNOWTRANS: Boosting Transferability of Data Preparation LLMs via Knowledge Augmentation". Please see our paper for technique details.
+This repo contains code for `KNOWTRANS: Boosting Transferability of Data Preparation LLMs via Knowledge Augmentation`. Please see our paper `KnowTrans-Full-Version.pdf` for technique details.
 
 # Abstract
 
@@ -75,7 +75,7 @@ KNOWTRANS consists of two components: SKC for training stage and AKB for inferen
         --save_path {save_path}
     ```
 
-- Refinemnt:
+- Refinment:
     ```python
     python src/run_DP.py \
         --task={dataset_name} \
