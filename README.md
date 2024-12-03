@@ -46,7 +46,7 @@ KNOWTRANS consists of two components: SKC for the training stage and AKB for the
 
 ### SKC (Training Stage)
 
-1. Download datasets from [Jellyfish Benchmark](https://huggingface.co/datasets/NECOUDBFM/Jellyfish-Instruct). If prepare your own datasets, we also provide a dataset preprocessing script `python AKB/data_utils/prepare.py`. 
+1. Download datasets from [Jellyfish Benchmark](https://huggingface.co/datasets/NECOUDBFM/Jellyfish-Instruct). If prepare your own datasets, we also provide a dataset preprocessing script `python src/data_utils/prepare.py`. 
    
 2. Run upstream training scripts in `scripts/upstream-train-7B/train.sh` with LLaMA-Factory.
 
