@@ -57,6 +57,8 @@ KNOWTRANS consists of two components: SKC for the training stage and AKB for the
         --save_path={save_path}
     ```
 
+    `train_version` and `test_version`: these parameters specify the version suffix of the knowledge rules used in      training and testing. For example, 000 corresponds to the rules_000 in the abt_buy.json of the template folder.
+
 - Refinement:
     ```python
     python src/run_DP.py \

@@ -596,7 +596,7 @@ def register_templates_from_folder(folder_path):
             except (json.JSONDecodeError, IOError) as e:
                 print(f"Error loading JSON file '{file_name}': {e}")
 
-register_templates_from_folder('./AKB/templates')
+register_templates_from_folder('./templates')
 
 _sotab_comma = {
     "Restaurant": "time, day of week, country, locality of address, telephone, name of restaurant, postal code, region of address, coordinate, description of restaurant, payment accepted, price range, review",
