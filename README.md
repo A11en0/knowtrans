@@ -25,6 +25,23 @@ Last, in order to run AKB component, you need setup your OPENAI_API_KEY with the
 ```
 export OPENAI_API_KEY=YOUR_KEY
 ```
+<!-- 
+## Dataset Preparation
+1. Transfer instance to string.
+   
+   `python AKB/data_utils/prepare.py`
+
+2. Export instruction datasets.
+    ```python
+    python experiments/run_DP.py \
+        --task={task} \
+        --mode='export' \
+        --test_dataset={dataset} \
+        --test_version='' \
+        --save_suffix='test'
+    ```
+
+3. (optional) If In-context Learning is necessary, add "--export_as_demo true" parameter to generate damo datasets based on train.json and use "ICL_method".  -->
 
 ## Running
 
@@ -38,68 +55,45 @@ export OPENAI_API_KEY=YOUR_KEY
 
 ### AKB (Inference Stage)
 
-1. Transfer instance to string 
+4. Run AKB
    
-   `python AKB/data_utils/prepare.py`
-
-2. run AKB
+ - Generation:
     ```python
     python experiments/run_DP.py \
-        --task={task} \
-        --mode='export' \
-        --test_dataset={dataset} \
+        --task={dataset_name} \
+        --mode='train' \
+        --train_dataset='{train_dataset}' \
+        --train_version='' \
+        --test_dataset='{test_dataset}' \
         --test_version='' \
-        --save_suffix='test'
+        --infer_mode='direct' \
+        --component='rules' \
+        --save_suffix='-train' \
+        --model {upstream_model_path} \
+        --lora {lora_path} \
+        --save_path {save_path}
     ```
 
-3. (optional) If In-context Learning is necessary, add "--export_as_demo true" parameter to generate damo datasets based on train.json and use "ICL_method". 
-
-### Config of AKB (Generation & Refinemnt)
-
-the config file is 'experiments/configs/default.yaml'
-
-python experiments/run_DP.py \
-    --task={dataset_name} \
-    --mode='train' \
-    --train_dataset='{train_dataset}' \
-    --train_version='' \
-    --test_dataset='{test_dataset}' \
-    --test_version='' \
-    --infer_mode='direct' \
-    --component='rules' \
-    --save_suffix='-train' \
-    --model {upstream_model_path} \
-    --lora {lora_path} \
-    --save_path {save_path}
-
-python experiments/run_DP.py \
-    --task={dataset_name} \
-    --mode='error' \
-    --train_dataset='{train_dataset}' \
-    --train_version='' \
-    --test_dataset='{test_dataset}' \
-    --test_version='1' \
-    --infer_mode='direct' \
-    --save_suffix='-train_1' \
-    --model {upstream_model_path} \
-    --lora {lora_path} \
-    --save_path {save_path}
-
-
-
-
-
-
-
-
-
-
-
-
+- Refinemnt:
+    ```python
+    python experiments/run_DP.py \
+        --task={dataset_name} \
+        --mode='error' \
+        --train_dataset='{train_dataset}' \
+        --train_version='' \
+        --test_dataset='{test_dataset}' \
+        --test_version='1' \
+        --infer_mode='direct' \
+        --save_suffix='-train_1' \
+        --model {upstream_model_path} \
+        --lora {lora_path} \
+        --save_path {save_path}
+    ```
 
 ## Comments
 
 Our codebase is based on the following repo. Thanks for open-sourcing!
 
 - [LLaMA-Factory](https://github.com/hiyouga/LLaMA-Factory)
-- [peft](https://github.com/huggingface/peft)
+- [APE](https://github.com/keirp/automatic_prompt_engineer)
+- [PEFT](https://github.com/huggingface/peft)
