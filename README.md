@@ -77,7 +77,7 @@ KNOWTRANS consists of two components: Selective Knowledge Concentration (SKC) fo
 
 5. Export instruction datasets with knowledge.
     ```python
-    python experiments/run_DP.py \
+    python src/run_DP.py \
         --task={task} \
         --mode='export' \
         --test_dataset={dataset} \
