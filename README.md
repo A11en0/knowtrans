@@ -30,17 +30,86 @@ KNOWTRANS consists of two components: Selective Knowledge Concentration (SKC) fo
 
 ### SKC (Training Stage)
 
-1. Download datasets from [Jellyfish Benchmark](https://huggingface.co/datasets/NECOUDBFM/Jellyfish-Instruct). If prepare your own datasets, we also provide a dataset preprocessing script `python src/data_utils/prepare.py`. 
-   
+1. Download datasets from [Jellyfish Benchmark](https://huggingface.co/datasets/NECOUDBFM/Jellyfish-Instruct). If prepare your own datasets, we also provide a dataset preprocessing script `python src/data_utils/prepare.py`. Put all the dataset file in './data' and register them in dataset_info.json following LLaMA-Factory.
+
+2. Add extra finetuning_args in LLaMA-Factory:
+    ```python
+    use_wlora: bool = field(
+        default=False,
+        metadata={"help": "Whether use_wlora."},
+    ) 
+    lora_ckpt_dir: str = field(
+        default="./",
+        metadata={"help": "Path to the adapters of the saved LoRA model."},        
+    )
+    ```
+
 2. Run upstream training scripts in `scripts/upstream-train-7B/train.sh` with LLaMA-Factory.
 
-3. Run downstream training script in `scripts/train-few-shot.sh` with LLaMA-Factory.
+3. Run downstream training script in `scripts/downstream-train/train.sh` with LLaMA-Factory.
 
 ### AKB (Inference Stage)
 
-4. Run AKB
-   
- - Generation:
+以下是仅保留 `Description` 的参数说明：
+
+---
+
+### 4. Run AKB
+
+The `main` function takes the following arguments:
+
+- `task` - The specific task or dataset to be performed.
+
+- `train_version` - The version identifier for the training dataset rules. For example, 'best' is 'rules_best' in template dict.
+
+- `test_version` - The version identifier for the testing dataset rules.
+
+- `mode` - The operating mode of the program. Options: `'train'`, `'test'`, `'export'`, `'error'`, `'pipeline'`.
+
+- `train_dataset` - Path to the labeled training dataset.
+
+- `test_dataset` - Path to the labeled testing dataset.
+
+- `component` - The component to optimize. Default is `'rules'`.
+
+- `save_suffix` - Suffix for the saved result file name, appended after the task name.
+
+- `model` - Path to the evaluation/testing model.
+
+- `lora` - Path to the evaluation/testing LoRA model.
+
+- `infer_mode` - Inference mode.
+
+- `ICL_method` - The In-Context Learning (ICL) method configuration.
+
+- `demo_dataset` - Path to the demonstration dataset.
+
+- `metric` - Evaluation metric.
+
+- `save_path` - Path to save output files.
+
+- `export_as_demo` - Activate to export only as a demonstration dataset. Note: Cannot be used for testing purposes.
+
+- Pipeline:
+    ```python
+    python src/run_DP.py \
+        --task={dataset_name} \
+        --mode='pipeline' \
+        --train_dataset={train_dataset} \
+        --train_version='' \
+        --test_dataset={test_dataset} \
+        --test_version='' \
+        --infer_mode='direct' \
+        --component='rules' \
+        --save_suffix='' \
+        --model={upstream_model_path} \
+        --lora={lora_path} \
+        --save_path={save_path}
+    ```
+
+Or run the Knowledge Generation and Knowledge Refinement seperately
+
+- Generation:
     ```python
     python src/run_DP.py \
         --task={dataset_name} \
@@ -56,8 +125,6 @@ KNOWTRANS consists of two components: Selective Knowledge Concentration (SKC) fo
         --lora={lora_path} \
         --save_path={save_path}
     ```
-
-    `train_version` and `test_version`: these parameters specify the version suffix of the knowledge rules used in      training and testing. For example, 000 corresponds to the rules_000 in the abt_buy.json of the template folder.
 
 - Refinement:
     ```python
@@ -85,8 +152,6 @@ KNOWTRANS consists of two components: Selective Knowledge Concentration (SKC) fo
         --save_suffix='test'
     ```
 
-    (optional) If In-context Learning is necessary, add "--export_as_demo true" parameter to generate damo datasets based   on train.json and use "ICL_method". 
-
 6. Inference on the test dataset
    ```python
    python src/run_infer.py \
@@ -99,6 +164,8 @@ KNOWTRANS consists of two components: Selective Knowledge Concentration (SKC) fo
     --enable_vllm \
     --overwrite
    ```
+
+   (optional) If In-context Learning is necessary, add "--export_as_demo true" parameter to generate damo datasets based on train.json in task dataset and use ICL_method='{"sim":"em-3"}' to choose the top-3 similar instance as demo.
 
 ## Comments
 

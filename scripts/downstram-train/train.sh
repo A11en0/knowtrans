@@ -5,7 +5,7 @@
 #SBATCH -N 1
 #SBATCH -n 8
 #SBATCH --gres=gpu:1
-#SBATCH --output=experiments/SKC/upstream-train.out
+#SBATCH --output=experiments/SKC/downstream-train.out
 
 # Set PYTHONPATH
 export PYTHONPATH=$(pwd)
@@ -26,5 +26,4 @@ export CUDA_VISIBLE_DEVICES=0
 
 
 export WANDB_NAME=few-shot-weight
-llamafactory-cli train scripts/upstream-train/adult.yaml
-
+llamafactory-cli train scripts/downstram-train/SKC.yaml

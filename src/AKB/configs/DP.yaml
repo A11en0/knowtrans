@@ -1,0 +1,46 @@
+generation:
+  num_subsamples: 1 # the number of unique queries sent to the LLM with different demonstrations for prompt generation
+  num_demos: 10 # the number of demonstrations sent to the LLM for each unique query
+  num_prompts_per_subsample: 1 # the number of prompts generated for each unique query
+  model:
+    name: GPT_forward
+    batch_size: 1 # the maximum batch size used for prompt generation
+    gpt_config: # the configuration of the GPT model used for prompt generation (these are fed directly to the openai function)
+      model: gpt-4o-mini
+      temperature: 0.9
+      max_tokens: 512
+      top_p: 0.9
+      frequency_penalty: 0.0
+      presence_penalty: 0.0
+refine:
+  num_subsamples: 5
+  num_demos: 4
+  num_prompts_per_subsample: 1
+  model:
+    name: GPT_forward
+    batch_size: 1
+    gpt_config:
+      model: gpt-4o-mini
+      temperature: 0.9
+      max_tokens: 3072
+      top_p: 0.9
+      frequency_penalty: 0.0
+      presence_penalty: 0.0
+evaluation:
+  method: f1_score
+  num_samples: 100
+  num_few_shot: 0 # deprecated
+  model:
+    name: GPT_forward
+    batch_size: 4
+    gpt_config:
+      model: ./pre-train/Jellyfish-7B
+      temperature: 0.35
+      max_tokens: 128
+      top_p: 0.9
+      top_k: 10
+      frequency_penalty: 0.0
+      presence_penalty: 0.0
+      use_beam_search: False
+      best_of: 1
+      seed: 42

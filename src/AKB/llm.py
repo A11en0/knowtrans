@@ -91,23 +91,14 @@ class GPT_Forward(LLM):
                 # api_key=''
             )
             # temp added for token analysis
-            self.tokenizer = AutoTokenizer.from_pretrained('/share/home/12351018/pre-train/Jellyfish-7B')
+            self.tokenizer = AutoTokenizer.from_pretrained('./pre-train/Jellyfish-7B')
         else:
-            
-            if '7B' in self.model_id:
-                self.tokenizer = AutoTokenizer.from_pretrained('/share/home/12351018/pre-train/Jellyfish-7B')
-            elif '8B' in self.model_id:
-                self.tokenizer = AutoTokenizer.from_pretrained('/share/home/12351018/pre-train/Jellyfish-8B')
-            elif '13B' in self.model_id:
-                self.tokenizer = AutoTokenizer.from_pretrained('/share/home/12351018/pre-train/Jellyfish-13B')
-            elif 'TableLlama' in self.model_id:
-                self.tokenizer = AutoTokenizer.from_pretrained('/share/home/12351018/pre-train/TableLlama')
-            # self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
+            self.tokenizer.add_special_tokens({'pad_token': '[PAD]'})
             self.tokenizer.pad_token_id = self.tokenizer.eos_token_id
             self.tokenizer.padding_side = "left"
 
             self.lora_path = config['gpt_config'].get('lora', None)
-            if self.lora_path and ('--merge' in self.lora_path or '-weight' in self.lora_path): # merged lora cannot use vllm directly
+            if self.lora_path: # merged lora cannot use vllm directly
                 if '13B' in self.model_id:
                     self.model = AutoModelForCausalLM.from_pretrained(config['gpt_config']['model'], torch_dtype=torch.float16).to("cuda")
                 else:
@@ -348,25 +339,10 @@ class GPT_Forward(LLM):
                             # return_tensors="pt",
                             # padding=True,
                         )
-                        # response = self.vllm.generate(prompt_token_ids=input_ids, sampling_params=sampling_params)
                         response = self.vllm.generate(prompts=input_ids, 
                                                       sampling_params=sampling_params,
                                                       lora_request=LoRARequest("default", 1, self.lora_path) if self.lora_path else None,
                                                       )
-                    # else:
-                    #     message = [
-                    #         [
-                    #             {"role": "user", "content": f"{system_message}\n\n{pt}"}, # [INST] should behind the system_message
-                    #         ] 
-                    #         for pt in prompt
-                    #     ]
-                    #     input_ids = self.tokenizer.apply_chat_template(
-                    #         message,
-                    #         add_generation_prompt=True,
-                    #         # return_tensors="pt",
-                    #         # padding=True,
-                    #     )
-                    #     response = self.vllm.generate(prompt_token_ids=input_ids, sampling_params=sampling_params)
                     else:
                         if '13B' in self.model_id:
                             message = [f"{system_message}\n\n### Instruction:\n\n{pt}\n\n### Response:\n\n" for pt in prompt]
@@ -374,7 +350,7 @@ class GPT_Forward(LLM):
                             message = [f"{system_message}\n\n### Instruction:\n{pt}\n\n### Response:\n" for pt in prompt]
                         else:
                             message = [f"{system_message}\n\n[INST]\n\n{pt}\n\n[/INST]\n\n" for pt in prompt]
-                        response = self.vllm.generate(prompts=message, sampling_params=sampling_params, lora_request=LoRARequest("default", 1, self.lora_path) if self.lora_path else None)
+                        responses = self.vllm.generate(prompts=message, sampling_params=sampling_params, lora_request=LoRARequest("default", 1, self.lora_path) if self.lora_path else None)
                     responses.extend([res.outputs[0].text for res in responses])
                 if random.randint(0, 9) == 0:
                     print(f"[INFO] prompt in GPT_Forward.__generate_text: {message}")

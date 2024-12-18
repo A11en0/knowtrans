@@ -1,6 +1,6 @@
 bf16: true
 cutoff_len: 1024
-dataset: upstream-task-adult
+dataset: few-shot-train20
 ddp_timeout: 180000000
 do_train: true
 eval_steps: 0.15
@@ -14,9 +14,9 @@ lora_alpha: 32
 lora_rank: 32
 lora_target: q_proj,k_proj,v_proj,o_proj
 lr_scheduler_type: cosine
-model_name_or_path: ./pre-train/Mistral-7B-OpenOrca
+model_name_or_path: ./knowtrans/Jellyfish-7B
 num_train_epochs: 3.0
-output_dir: upstream-task-adult
+output_dir: experiments/outputs/7B/Our-SKC
 overwrite_cache: true
 overwrite_output_dir: true
 per_device_eval_batch_size: 4
@@ -30,3 +30,5 @@ stage: sft
 template: mistral
 val_size: 0.1
 warmup_ratio: 0.1
+use_wlora: true
+lora_ckpt_dir: ./outputs/7B/upstream-task

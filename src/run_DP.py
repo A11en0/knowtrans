@@ -2,7 +2,6 @@ import random
 import fire
 from AKB import ape, data, template
 from load_data import load_dataset
-# from experiments.evaluation.instruction_induction.exec_accuracy import exec_accuracy_evaluator
 import yaml
 import re
 import argparse
@@ -23,9 +22,7 @@ def run(task, component, train_version, train_dataset, test_version, test_datase
         prompt_gen_data, eval_data = data.create_split(
             train_data, max(20, int(len(train_data)*0.2)))
     
-
-    
-    with open(f'./experiments/configs/default.yaml') as f:
+    with open(f'src/AKB/configs/DP.yaml') as f:
         conf = yaml.safe_load(f)
         conf['evaluation']['num_samples'] = min(len(eval_data),conf['evaluation']['num_samples'])
         conf['generation']['num_demos'] = min(len(train_data), conf['generation']['num_demos'])
@@ -62,11 +59,10 @@ def run(task, component, train_version, train_dataset, test_version, test_datase
     return 
 
 
-
 def error(task, component, train_dataset, train_version, test_dataset, test_version, save_suffix, model, lora, infer_mode, ICL_method, save_path):
     train_data, template = load_dataset(task, train_version, train_dataset, infer_mode, ICL_method, None, component)
     
-    with open(f'./experiments/configs/default.yaml') as f:
+    with open(f'src/AKB/configs/DP.yaml') as f:
         conf = yaml.safe_load(f)
         conf['evaluation']['num_samples'] = min(len(train_data),conf['evaluation']['num_samples'])
         if model:
@@ -119,10 +115,102 @@ def error(task, component, train_dataset, train_version, test_dataset, test_vers
     return 
 
 
+def execute_pipeline(task, component, train_dataset, train_version="", test_dataset=None, test_version="", save_suffix="", model=None, lora=None, infer_mode=None, ICL_method=None, demo_dataset=None, metric=None, save_path=None):
+    """
+    Execute the whole pipeline by `run` and `error` functions in sequence with the specified parameters.
+    """
+    print("[INFO] Starting the pipeline...")
+
+    # Step 1: Load Dataset
+    print("[INFO] Running `Knowledge Generation` function...")
+    train_data, template = load_dataset(task, train_version, train_dataset, infer_mode, ICL_method, demo_dataset, component)
+    if len(train_data) <= 20:
+        prompt_gen_data = train_data.copy()
+        eval_data = train_data.copy()
+    else:
+        prompt_gen_data, eval_data = data.create_split(train_data, max(20, int(len(train_data) * 0.2)))
+
+    # Step 2: Configure Parameters
+    with open(f'src/AKB/configs/DP.yaml') as f:
+        conf = yaml.safe_load(f)
+        conf['evaluation']['num_samples'] = min(len(eval_data), conf['evaluation']['num_samples'])
+        conf['generation']['num_demos'] = min(len(train_data), conf['generation']['num_demos'])
+        if model:
+            conf['evaluation']['model']['gpt_config']['model'] = model
+        if metric:
+            conf['evaluation']['method'] = metric
+        if lora:
+            conf['evaluation']['model']['gpt_config']['lora'] = lora
+
+    # Step 3: Find Prompts
+    res, _ = ape.find_prompts(
+        task_type=template.task_type,
+        eval_template=template,
+        prompt_gen_data=prompt_gen_data,
+        eval_data=eval_data,
+        conf=conf,
+        few_shot_data=prompt_gen_data,
+        demos_template=template._demo_template,
+        prompt_gen_template=template.prompt_gen_template(component),
+        seed_prompt=template.get_component(component),
+        component=component,
+    )
+
+    print('Finished finding prompts.')
+    prompts, scores = res.sorted()
+    print('Prompts:')
+    for prompt, score in zip(prompts, scores):
+        print(f'  {score}: {prompt}')
+
+    print('--' * 50)
+    print(f'Evaluating on test data with prompt: {prompts[0]}')
+    template.update(component, prompts[0])
+
+    # Step 4: Error Refinement
+    print("[INFO] Running `Knowledge Refinement` function...")
+    train_res = res
+    print(f"[INFO] Train errors computed: {train_res.sorted()[1][0]} on {len(train_res.errors)} instances")
+
+    for i in range(2):
+        if not train_res.errors:
+            print("[Warning] The train set has no errors now!")
+            break
+
+        eval_res = ape.refine_prompts(
+            task=task,
+            task_type=template.task_type,
+            component=component,
+            eval_template=template,
+            demos_template=template._demo_template,
+            error_data=train_res.errors,
+            eval_data=train_data,
+            origin_prompt=template,
+            conf=conf,
+        )
+
+        print('Finished refining knowledges.')
+        prompts, scores = eval_res.sorted()
+        print('Prompts:')
+        for prompt, score in zip(prompts, scores):
+            print(f'  {score}: {prompt}')
+
+        train_res = eval_res
+        template.update(component, prompts[0])
+
+        if test_dataset:
+            infer(
+                task, component, template, test_dataset, test_version, save_suffix,
+                conf, infer_mode, ICL_method, None, save_path + f"-{i + 1}h", train_res
+            )
+
+    print("[INFO] Pipeline execution completed.")
+
+
+
 def test(task, component, test_version, test_dataset, save_suffix, model, lora, infer_mode, ICL_method, demo_dataset, save_path='test'):
     test_data, template = load_dataset(task, test_version, test_dataset, infer_mode, ICL_method, demo_dataset)
 
-    with open(f'./experiments/configs/default.yaml') as f:
+    with open(f'src/AKB/configs/DP.yaml') as f:
         conf = yaml.safe_load(f)
         if model:
             conf['evaluation']['model']['gpt_config']['model'] = model
@@ -182,27 +270,27 @@ def export(task, version, dataset, save_suffix, infer_mode, ICL_method, demo_dat
 
 
 def main():
-    parser = argparse.ArgumentParser(description="A simple CLI calculator")
+    parser = argparse.ArgumentParser(description="A command-line tool for managing datasets and models.")
     
-    parser.add_argument("--task", help="The operation to perform")
-    parser.add_argument("--train_version", type=str, help="version for _template")
-    parser.add_argument("--test_version", type=str, help="version for _template")
-    parser.add_argument("--train_pattern", type=str, default=None, help="version for _template")
-    parser.add_argument("--test_pattern", type=str, default=None, help="version for _template")
-    parser.add_argument("--mode", choices=['train','test', 'export', 'error'], help="version for _template")
-    parser.add_argument("--train_dataset", type=str, help="The second operand")
-    parser.add_argument("--test_dataset", type=str, help="The second operand")
-    parser.add_argument("--component", type=str, default=None, help="The second operand")
-    parser.add_argument("--save_suffix", type=str, help="The second operand")
-    parser.add_argument("--model", type=str, default=None, help="eval/test model")
-    parser.add_argument("--lora", type=str, default=None, help="eval/test model")
-    parser.add_argument("--infer_mode", type=str, choices=['direct','reason'], default='direct', help="eval/test model")
-    parser.add_argument("--ICL_method", type=str, default="{}", help="eval/test model")
-    parser.add_argument("--demo_dataset", type=str, default=None, help="The second operand")
-    parser.add_argument("--metric", type=str, choices=['f1_score', 'likelihood'], default='f1_score', help="metric for evaluation")
-    parser.add_argument("--save_path", type=str, default=None, help="save_path")
-    parser.add_argument("--export_as_demo", type=bool, default=False, help="export only as demo dataset, cannot be used as test!")
+    parser.add_argument("--task", help="The specific task or dataset to be performed.")
+    parser.add_argument("--train_version", type=str, help="The version identifier for the training dataset rules.")
+    parser.add_argument("--test_version", type=str, help="The version identifier for the testing dataset rules.")
+    parser.add_argument("--mode", choices=['train', 'test', 'export', 'error', 'pipeline'], help="The operating mode of the program. Options: 'train', 'test', 'export', 'error', 'pipeline'.")
+    parser.add_argument("--train_dataset", type=str, help="Path to the labeled training dataset.")
+    parser.add_argument("--test_dataset", type=str, help="Path to the labeled testing dataset.")
+    parser.add_argument("--component", type=str, default="rules", help="The component to optimize. Default is 'rules'.")
+    parser.add_argument("--save_suffix", type=str, help="Suffix for the saved result file name, appended after the task name.")
+    parser.add_argument("--model", type=str, default=None, help="Path to the evaluation/testing model.")
+    parser.add_argument("--lora", type=str, default=None, help="Path to the evaluation/testing LoRA model.")
+    parser.add_argument("--infer_mode", type=str, choices=['direct'], default='direct', help="Inference mode.")
+    parser.add_argument("--ICL_method", type=str, default="{}", help="The In-Context Learning (ICL) method configuration.")
+    parser.add_argument("--demo_dataset", type=str, default=None, help="Path to the demonstration dataset.")
+    parser.add_argument("--metric", type=str, choices=['f1_score'], default='f1_score', help="Evaluation metric.")
+    parser.add_argument("--save_path", type=str, default=None, help="Path to save output files.")
+    parser.add_argument("--export_as_demo", type=bool, default=False, help="Whether to export only as a demonstration dataset. Note: Cannot be used for testing purposes.")
     
+    args = parser.parse_args()
+
     args = parser.parse_args()
 
     args.ICL_method = json.loads(args.ICL_method)
@@ -218,6 +306,8 @@ def main():
         export(args.task, args.test_version, args.test_dataset, args.save_suffix, args.infer_mode, args.ICL_method, args.demo_dataset, args.export_as_demo)
     elif args.mode == "error":
         error(args.task, args.component, args.train_dataset, args.train_version, args.test_dataset, args.test_version, args.save_suffix, args.model, args.lora, args.infer_mode, args.ICL_method, args.save_path)
+    elif args.mode == "pipeline":
+        execute_pipeline(args.task, args.component, args.train_dataset, args.train_version, args.test_dataset, args.test_version, args.save_suffix, args.model, args.lora, args.infer_mode, args.ICL_method, args.demo_dataset, args.save_path)
     else:
         print("Error: Invalid operation")
         

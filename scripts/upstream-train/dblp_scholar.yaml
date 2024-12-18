@@ -1,6 +1,6 @@
 bf16: true
 cutoff_len: 1024
-dataset: upstream-task-adult
+dataset: upstream-task-dblp_scholar
 ddp_timeout: 180000000
 do_train: true
 eval_steps: 0.15
@@ -16,7 +16,7 @@ lora_target: q_proj,k_proj,v_proj,o_proj
 lr_scheduler_type: cosine
 model_name_or_path: ./pre-train/Mistral-7B-OpenOrca
 num_train_epochs: 3.0
-output_dir: upstream-task-adult
+output_dir: upstream-task-dblp_scholar
 overwrite_cache: true
 overwrite_output_dir: true
 per_device_eval_batch_size: 4
