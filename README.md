@@ -50,10 +50,6 @@ KNOWTRANS consists of two components: Selective Knowledge Concentration (SKC) fo
 
 ### AKB (Inference Stage)
 
-以下是仅保留 `Description` 的参数说明：
-
----
-
 ### 4. Run AKB
 
 The `main` function takes the following arguments:
